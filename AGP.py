@@ -10,6 +10,7 @@ import binascii
 import codecs
 import sys
 import os.path
+import time
 from datetime import datetime
 from java.io import FileInputStream
 from java.io import IOException
@@ -21,6 +22,8 @@ from org.apache.poi.hssf.usermodel import HSSFSheet
 from org.apache.poi.hssf.usermodel import HSSFWorkbook
 from subprocess import Popen, PIPE
 from javax.swing import JCheckBox
+from javax.swing import JLabel
+from javax.swing import JTextField
 from java.awt import GridLayout
 from java.awt import GridBagLayout
 from java.awt import GridBagConstraints
@@ -114,23 +117,19 @@ class AGPIngestModule(DataSourceIngestModule):
 
         if self.local_settings.getSetting('CSV_Flag') == 'true':
             if PlatformUtil.isWindowsOS():
-                self.log(Level.INFO, "XLS ==> " + str(self.local_settings.getSetting('CSV_Flag')))
                 self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
                 if not os.path.exists(self.path_to_Webcache_file):
                    raise IngestModuleException("XLS  does not exist for Windows")
             elif PlatformUtil.getOSName() == 'Linux':
-                self.log(Level.INFO, "XLS ==> " + str(self.local_settings.getSetting('CSV_Flag')))
                 self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
                 if not os.path.exists(self.path_to_Webcache_file):
                    raise IngestModuleException("XLS  does not exist for Linux")
         if self.local_settings.getSetting('DOWNLOAD') == 'true':
             if PlatformUtil.isWindowsOS():
-                self.log(Level.INFO, "XLS ==> " + str(self.local_settings.getSetting('DOWNLOAD')))
                 self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
                 if not os.path.exists(self.path_to_Webcache_file):
                    raise IngestModuleException("XLS  does not exist for Windows")
             elif PlatformUtil.getOSName() == 'Linux':
-                self.log(Level.INFO, "XLS ==> " + str(self.local_settings.getSetting('DOWNLOAD')))
                 self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
                 if not os.path.exists(self.path_to_Webcache_file):
                    raise IngestModuleException("XLS  does not exist for Linux")
@@ -142,8 +141,10 @@ class AGPIngestModule(DataSourceIngestModule):
 
         self.log(Level.INFO, "Starting to process")
         progressBar.switchToIndeterminate()
-        
-       
+     
+        self.level_traverse = int(self.local_settings.getSetting('Level'))
+        self.log(Level.INFO, self.local_settings.getSetting('Level'))
+        start_time = time.time()
         now = datetime.now()
         dt_string = now.strftime("%d%m%Y%H%M%S")
         self.path_to_Webcache_file10 = os.path.join(os.path.dirname(os.path.abspath(__file__)), ( "report" + dt_string + ".html"))
@@ -181,21 +182,23 @@ class AGPIngestModule(DataSourceIngestModule):
         IngestServices.getInstance().postMessage(message)
        
         print "</html>" 
+        
+        
+        self.log(Level.INFO, "--- %s seconds plugin run ---" % (time.time() - start_time))
         return IngestModule.ProcessResult.OK                
 
     def process_File(self, dataSource, progressBar): 
         progressBar.switchToIndeterminate()
+        
         skCase = Case.getCurrentCase().getSleuthkitCase()
         blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
         files = fileManager.findFiles(dataSource, "%", "/")
         if PlatformUtil.isWindowsOS():
-            self.log(Level.INFO, "XLS ==> " + str(self.local_settings.getSetting('CSV_Flag')))
             self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
             if not os.path.exists(self.path_to_Webcache_file):
                  raise IngestModuleException("XLS Executable does not exist for Windows")
         elif PlatformUtil.getOSName() == 'Linux':
-            self.log(Level.INFO, "XLS ==> " + str(self.local_settings.getSetting('CSV_Flag')))
             self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
             if not os.path.exists(self.path_to_Webcache_file):
                 raise IngestModuleException("XLS Executable does not exist for Linux")
@@ -245,49 +248,47 @@ class AGPIngestModule(DataSourceIngestModule):
                                     
                                 
                                 files = fileManager.findFiles(dataSource, val2,  "%" + filePath['path'])
-                                self.log(Level.INFO, "val2  " + val2)
-                                self.log(Level.INFO, " path    " + filePath['path'])
                                 
-                                self.log(Level.INFO, "files found " + str(len(files)))
-                                self.log(Level.INFO, "-----------------------------")
                                 numFiles = len(files)
                                 try:
                                     if(numFiles == 0):
                                         astring = filePath['path'].replace("/", "\\")
-                                        if(len(astring) > 2):
+                                        if(len(astring) > 3):
                                             files = fileManager.findFiles(dataSource, val2,  "%" + astring)
                                             numFiles = len(files)
                                 except:
                                     a100 = 0
                                 
                                 try:
-                                    if(numFiles == 0):
+                                    if(numFiles == 0 and val2 !=  "" and val2 !=  "%"):
                                         astring = filePath['path'].replace("\\", "/")
-                                        if(len(astring) > 2):
+                                        if(len(astring) > 3):
                                             files = fileManager.findFiles(dataSource, val2,  "%" + astring)
                                             numFiles = len(files)
                                 except:
                                     a100 = 0                                
                                     
-                                try:
-                                    if(numFiles == 0):
-                                        astring = filePath['path'].replace("/", "\\")
-                                        astring = astring[astring[1:].find('\\')+1:]#os.path(astring.parts[1:])                                     
-                                        if(len(astring) > 2):
-                                            files = fileManager.findFiles(dataSource, val2,  "%" + astring)
-                                            numFiles = len(files) 
                                     
+                                try: 
+                                    astring = filePath['path'].replace("/", "\\")
+                                    for m in range(self.level_traverse):
+                                        if(numFiles == 0 and val2 !=  "" and val2 !=  "%"):
+                                            astring = astring[astring[1:].find('\\')+1:]#os.path(astring.parts[1:])                                     
+                                            if(len(astring) > 3):
+                                                files = fileManager.findFiles(dataSource, val2,  "%" + astring)
+                                                numFiles = len(files) 
                                 except:
                                     a100 = 0
-                                try:
-                                    if(numFiles == 0):
-                                        astring = filePath['path'].replace("/", "\\")
-                                        astring = astring[astring[1:].find('\\')+1:]
-                                        astring = astring[astring[1:].find('\\')+1:]                                       
-                                        if(len(astring) > 2):
-                                            files = fileManager.findFiles(dataSource, val2,  "%" + astring)
-                                            numFiles = len(files) 
+                                
                                     
+                                try: 
+                                    astring = filePath['path'].replace("\\", "/")
+                                    for m in range(self.level_traverse):
+                                        if(numFiles == 0 and val2 !=  "" and val2 !=  "%"):
+                                            astring = astring[astring[1:].find('/')+1:]#os.path(astring.parts[1:])                                     
+                                            if(len(astring) > 3):
+                                                files = fileManager.findFiles(dataSource, val2,  "%" + astring)
+                                                numFiles = len(files) 
                                 except:
                                     a100 = 0
                                    
@@ -295,29 +296,19 @@ class AGPIngestModule(DataSourceIngestModule):
                                     
                                 
                                 
-                                try:
-                                    if(numFiles == 0):
-                                        astring = filePath['path'].replace("\\", "/")
-                                        astring = astring[astring[1:].find('/')+1:]
-                                        if(len(astring) > 2):
-                                            files = fileManager.findFiles(dataSource, val2,  "%" + astring)
-                                            numFiles = len(files) 
-                                    
-                                except:
-                                    a100 = 0
-                                try:
-                                    if(numFiles == 0):
-                                        astring = filePath['path'].replace("\\", "/")
-                                        astring = astring[astring[1:].find('/')+1:]
-                                        astring = astring[astring[1:].find('/')+1:]
-                                        if(len(astring) > 2):
-                                            files = fileManager.findFiles(dataSource, val2,  "%" + astring)
-                                            numFiles = len(files)
-                                except:
-                                    a100 = 0                                
+                                                             
                                
-                                            
-                                     
+                                #self.log(Level.INFO,"-----------------" )
+                                #if( val2 !=  "" and val2 !=  "%"):
+                                #    self.log(Level.INFO,"000000000000000000000000000" )
+                                    
+                                #self.log(Level.INFO,"-----------------" )
+                                ##self.log(Level.INFO, " val 2 " + val2)
+                                #self.log(Level.INFO, " path 2 " + filePath['path'])
+                                #self.log(Level.INFO, " files len 2 " + str(numFiles))
+                                #self.log(Level.INFO,"-----------------")
+                                
+                                
                                 if(numFiles < 21):
                                     if(numFiles > 0):
                                         #self.printRow(val1,val2,filePath['path'])
@@ -336,7 +327,7 @@ class AGPIngestModule(DataSourceIngestModule):
                                         #IngestServices.getInstance().postMessage(message2)
                                         art = file.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_INTERESTING_FILE_HIT)
                                         att = BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_SET_NAME.getTypeID(), 
-                                        AGPIngestModuleFactory.moduleName, 'AGP ' + val1)
+                                        AGPIngestModuleFactory.moduleName, 'AGP - ' + val1)
                                         art.addAttribute(att)
                                         
                                         
@@ -425,16 +416,14 @@ class AGPIngestModule(DataSourceIngestModule):
         files = ntUserFiles + usrClassFiles  + files1 + files2 + files3 + files4 + files5 + files6 + files7 + files8
         
         numFiles = len(files)
-        self.log(Level.INFO, "Number of  Files found ==> " + str(numFiles))
+        #self.log(Level.INFO, "Number of  Files found ==> " + str(numFiles))
         
     
         if PlatformUtil.isWindowsOS():
-            self.log(Level.INFO, "XLS ==> " + str(self.local_settings.getSetting('DOWNLOAD')))
             self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
             if not os.path.exists(self.path_to_Webcache_file):
                  raise IngestModuleException("XLS Executable does not exist for Windows")
         elif PlatformUtil.getOSName() == 'Linux':
-            self.log(Level.INFO, "XLS ==> " + str(self.local_settings.getSetting('DOWNLOAD')))
             self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
             if not os.path.exists(self.path_to_Webcache_file):
                 raise IngestModuleException("XLS Executable does not exist for Linux")
@@ -485,7 +474,7 @@ class AGPIngestModule(DataSourceIngestModule):
                                         mn = str(value.getValue().getAsNumber())
                                         self.printRow(val, value.getName(),mn)
                                     except:
-                                        self.log(Level.INFO, "no number ")                                      
+                                        a101 = 1                                     
        
                               
                                 
@@ -513,14 +502,10 @@ class AGPIngestModule(DataSourceIngestModule):
                                     self.log(Level.INFO, "no bam key")
                                      
                                 try:
-                                    self.log(Level.INFO, "sam key " + val)
-                                    samKey = currentKey.getSubkeyList()   
-                                    self.log(Level.INFO, "sam key2")
+                                    samKey = currentKey.getSubkeyList()  
                                     for sk in samKey:
-                                        self.log(Level.INFO, "sam key3")
                                         registryKey = sk.getName()
                                         skValues = sk.getValueList()
-                                        self.log(Level.INFO, "sam key4 " + str(len(skValues)))
                                         if len(skValues) > 0:
                                             for skVal in skValues:
                                                 if skVal.getName() == 'V':
@@ -570,7 +555,7 @@ class AGPIngestModule(DataSourceIngestModule):
                                             mn = str(value.getValue().getAsNumber())
                                             self.printRow(val, value.getName(),mn)
                                         except:
-                                            self.log(Level.INFO, "no number ")
+                                            a102 = 1
                                         
                                     try:
                                         bamKey = currentKey.getSubkeyList()
@@ -730,14 +715,15 @@ class AGPWithUISettingsPanel(IngestModuleIngestJobSettingsPanel):
         else:
             self.local_settings.setSetting('DOWNLOAD', 'false')  
    
-    
+    def setLevel(self, event):
+        self.local_settings.setSetting('Level', self.Recentlyused_CB3.getText()) 
 
     def initComponents(self):
         self.panel0 = JPanel()
         self.gbPanel0 = GridBagLayout() 
         self.gbcPanel0 = GridBagConstraints() 
         self.panel0.setLayout( self.gbPanel0 ) 
-        self.Recentlyused_CB = JCheckBox( "File artifacts(put SearchResults.xls file inside same plugin directory level)", actionPerformed=self.checkBoxEvent) 
+        self.Recentlyused_CB = JCheckBox( "File artifacts", actionPerformed=self.checkBoxEvent) 
         self.gbcPanel0.gridx = 2 
         self.gbcPanel0.gridy = 5
         self.gbcPanel0.gridwidth = 1 
@@ -772,12 +758,42 @@ class AGPWithUISettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.gbcPanel0.anchor = GridBagConstraints.NORTH 
         self.gbPanel0.setConstraints( self.Recentlyused_CB2, self.gbcPanel0 ) 
         self.panel0.add( self.Recentlyused_CB2 )
+        
+        
+        self.Label_1 = JLabel("Traverse Level:")
+        self.Label_1.setEnabled(True)
+        self.gbcPanel0.gridx = 2 
+        self.gbcPanel0.gridy = 11 
+        self.gbcPanel0.gridwidth = 1 
+        self.gbcPanel0.gridheight = 1 
+        self.gbcPanel0.fill = GridBagConstraints.BOTH 
+        self.gbcPanel0.weightx = 1 
+        self.gbcPanel0.weighty = 0 
+        self.gbcPanel0.anchor = GridBagConstraints.NORTH 
+        self.gbPanel0.setConstraints( self.Label_1, self.gbcPanel0 ) 
+        self.panel0.add( self.Label_1 ) 
+        
+        
+        self.Recentlyused_CB3 = JTextField("",10,focusLost=self.setLevel) 
+        self.Recentlyused_CB3.setEnabled(True)
+        self.gbcPanel0.gridx = 4
+        self.gbcPanel0.gridy = 11
+        self.gbcPanel0.gridwidth = 1 
+        self.gbcPanel0.gridheight = 1 
+        self.gbcPanel0.fill = GridBagConstraints.BOTH 
+        self.gbcPanel0.weightx = 1 
+        self.gbcPanel0.weighty = 0 
+        self.gbcPanel0.anchor = GridBagConstraints.NORTH 
+        self.gbPanel0.setConstraints( self.Recentlyused_CB3, self.gbcPanel0 ) 
+        self.panel0.add( self.Recentlyused_CB3 )
+        
         self.add(self.panel0)
 
     def customizeComponents(self):
         self.Recentlyused_CB.setSelected(self.local_settings.getSetting('CSV_Flag') == 'true')
         self.Recentlyused_CB1.setSelected(self.local_settings.getSetting('DOWNLOAD') == 'true')
         self.Recentlyused_CB2.setSelected(self.local_settings.getSetting('EXPORT') == 'true')
+        self.Recentlyused_CB3.setText(self.local_settings.getSetting('Level'))
     # Return the settings used
     def getSettings(self):
         return self.local_settings

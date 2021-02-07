@@ -68,13 +68,13 @@ class AGPIngestModuleFactory(IngestModuleFactoryAdapter):
     def __init__(self):
         self.settings = None
 
-    moduleName = "Artifact Genome Project"
+    moduleName = "ForensicAF"
     
     def getModuleDisplayName(self):
         return self.moduleName
     
     def getModuleDescription(self):
-        return "Artifact Genome Project"
+        return "ForensicAF"
     
     def getModuleVersionNumber(self):
         return "1.0"
@@ -115,23 +115,23 @@ class AGPIngestModule(DataSourceIngestModule):
     def startUp(self, context):
         self.context = context
 
-        if self.local_settings.getSetting('CSV_Flag') == 'true':
+        if self.local_settings.getSetting('FileArtifacts_Flag') == 'true':
             if PlatformUtil.isWindowsOS():
-                self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
-                if not os.path.exists(self.path_to_Webcache_file):
+                self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
+                if not os.path.exists(self.path_to_Excel_file):
                    raise IngestModuleException("XLS  does not exist for Windows")
             elif PlatformUtil.getOSName() == 'Linux':
-                self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
-                if not os.path.exists(self.path_to_Webcache_file):
+                self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
+                if not os.path.exists(self.path_to_Excel_file):
                    raise IngestModuleException("XLS  does not exist for Linux")
-        if self.local_settings.getSetting('DOWNLOAD') == 'true':
+        if self.local_settings.getSetting('RegistryArtifacts_Flag') == 'true':
             if PlatformUtil.isWindowsOS():
-                self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
-                if not os.path.exists(self.path_to_Webcache_file):
+                self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
+                if not os.path.exists(self.path_to_Excel_file):
                    raise IngestModuleException("XLS  does not exist for Windows")
             elif PlatformUtil.getOSName() == 'Linux':
-                self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
-                if not os.path.exists(self.path_to_Webcache_file):
+                self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
+                if not os.path.exists(self.path_to_Excel_file):
                    raise IngestModuleException("XLS  does not exist for Linux")
 
         pass
@@ -143,42 +143,37 @@ class AGPIngestModule(DataSourceIngestModule):
         progressBar.switchToIndeterminate()
      
         self.level_traverse = int(self.local_settings.getSetting('Level'))
-        self.log(Level.INFO, self.local_settings.getSetting('Level'))
         start_time = time.time()
         now = datetime.now()
-        dt_string = now.strftime("%d%m%Y%H%M%S")
-        self.path_to_Webcache_file10 = os.path.join(os.path.dirname(os.path.abspath(__file__)), ( "report" + dt_string + ".html"))
-        sys.stdout = open(self.path_to_Webcache_file10,'w')
+        dt_string = str(int(time.time()))
+        self.path_to_Report_File = os.path.join(os.path.dirname(os.path.abspath(__file__)), ( "report" + dt_string + ".html"))
+        sys.stdout = open(self.path_to_Report_File,'w')
         print "<html>"
-        mes1000 = "<head><style>input { display: none; } input + label { display: inline-block } input ~ .tab { display: none } #tab1:checked ~ .tab.content1, #tab2:checked ~ .tab.content2 { display: block; } input + label {border: 1px solid #999;background: #EEE;padding: 4px 12px;border-radius: 4px 4px 0 0;position: relative;top: 1px;} input:checked + label { background: #FFF; border-bottom: 1px solid transparent;} input ~ .tab {border-top: 1px solid #999; padding: 12px;}  table {font-family: arial, sans-serif;border-collapse: collapse; width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}</style></head>"
-        print mes1000
-        
-        #mes1000 ="<div style=\"display: block;margin-left: auto;margin-right: auto;width: 40%;\"><a href=\"#dashboard\" data-transition=\"slide\" data-direction=\"reverse\"><img alt=\"\" title=\"\" src=\"https://agpnewhaven.com/static/img/agp_logo.png\"  /></a></div>"
-        #print mes1000
-        self.artifact_type = "Registry"
-      
-        
+        html_head = "<head><style>input { display: none; } input + label { display: inline-block } input ~ .tab { display: none } #tab1:checked ~ .tab.content1, #tab2:checked ~ .tab.content2 { display: block; } input + label {border: 1px solid #999;background: #EEE;padding: 4px 12px;border-radius: 4px 4px 0 0;position: relative;top: 1px;} input:checked + label { background: #FFF; border-bottom: 1px solid transparent;} input ~ .tab {border-top: 1px solid #999; padding: 12px;}  table {font-family: arial, sans-serif;border-collapse: collapse; width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}</style></head>"
+        print html_head
+
+        self.artifact_type = "Registry" 
         print "<input type=\"radio\" name=\"tabs\" id=\"tab1\" checked /><label for=\"tab1\">Registry</label><input type=\"radio\" name=\"tabs\" id=\"tab2\" /><label for=\"tab2\">File</label>"
         print "<div class=\"tab content1\">"
-        if self.local_settings.getSetting('DOWNLOAD') == 'true':
+        if self.local_settings.getSetting('RegistryArtifacts_Flag') == 'true':
                 self.process_Registry(dataSource, progressBar)
         print "</div>"
         self.artifact_type = "File"
        
         print "<div class=\"tab content2\">"
         #print "<tr><th>Artifact Type</th><th>Artifact name</th><th>FILE NAME</th><th>FILE PATH</th></tr>"
-        if self.local_settings.getSetting('CSV_Flag') == 'true':
+        if self.local_settings.getSetting('FileArtifacts_Flag') == 'true':
             progressBar.progress("Processing XLS")	
             self.process_File(dataSource, progressBar)
             message = IngestMessage.createMessage(IngestMessage.MessageType.DATA,
-                "AGP", " AGP File artifacts Has Been Analyzed " )
+                "ForensicAF", " ForensicAF File artifacts Has Been Analyzed " )
             IngestServices.getInstance().postMessage(message)
         print "</div>"
         
   
         # After all databases, post a message to the ingest messages in box.
         message = IngestMessage.createMessage(IngestMessage.MessageType.DATA,
-            "AGP", " AGP artifacts Has Been Analyzed " )
+            "ForensicAF", " ForensicAF artifacts Has Been Analyzed " )
         IngestServices.getInstance().postMessage(message)
        
         print "</html>" 
@@ -195,34 +190,26 @@ class AGPIngestModule(DataSourceIngestModule):
         fileManager = Case.getCurrentCase().getServices().getFileManager()
         files = fileManager.findFiles(dataSource, "%", "/")
         if PlatformUtil.isWindowsOS():
-            self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
-            if not os.path.exists(self.path_to_Webcache_file):
+            self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
+            if not os.path.exists(self.path_to_Excel_file):
                  raise IngestModuleException("XLS Executable does not exist for Windows")
         elif PlatformUtil.getOSName() == 'Linux':
-            self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
-            if not os.path.exists(self.path_to_Webcache_file):
+            self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
+            if not os.path.exists(self.path_to_Excel_file):
                 raise IngestModuleException("XLS Executable does not exist for Linux")
            
-        #print "<br><br><br><br><h1>FILE ARTIFACTS</h1><br><br><br><br>"     
- 
-        #print "<table>"
-        #print "<tr><th>Artifact Found</th><th>FILE NAME</th><th>FILE PATH</th></tr>"
-        
-        mes1000 ="<div style=\"display: block;margin-left: auto;margin-right: auto;width: 40%;\"><a href=\"#dashboard\" data-transition=\"slide\" data-direction=\"reverse\"><img alt=\"\" title=\"\" src=\"https://agpnewhaven.com/static/img/agp_logo.png\"  /></a></div>"
-        print mes1000
+        Div_Image_Logo ="<div style=\"display: block;margin-left: auto;margin-right: auto;width: 40%;\"><a href=\"#dashboard\" data-transition=\"slide\" data-direction=\"reverse\"><img alt=\"\" title=\"\" src=\"https://agpnewhaven.com/static/img/agp_logo.png\"  /></a></div>"
+        print Div_Image_Logo
         print "<table>"
         print "<tr><th>Artifact Type</th><th>Artifact name</th><th>FILE NAME</th><th>FILE PATH</th><th>Path on Disk</th></tr>"
         if True:
             if True:
                 try:
                     
-                    inp = FileInputStream(self.path_to_Webcache_file)
-                   
-
+                    inp = FileInputStream(self.path_to_Excel_file)
                     myWorkBook = HSSFWorkbook (inp)
                     sheet = myWorkBook.getSheet("File Artifacts")
                     i1  = 1
-                    
                     rowsCount = sheet.getLastRowNum()
                     while i1 <= rowsCount:
                         row = sheet.getRow(i1)
@@ -291,43 +278,21 @@ class AGPIngestModule(DataSourceIngestModule):
                                                 numFiles = len(files) 
                                 except:
                                     a100 = 0
-                                   
-                                   
-                                    
-                                
-                                
-                                                             
-                               
-                                #self.log(Level.INFO,"-----------------" )
-                                #if( val2 !=  "" and val2 !=  "%"):
-                                #    self.log(Level.INFO,"000000000000000000000000000" )
-                                    
-                                #self.log(Level.INFO,"-----------------" )
-                                ##self.log(Level.INFO, " val 2 " + val2)
-                                #self.log(Level.INFO, " path 2 " + filePath['path'])
-                                #self.log(Level.INFO, " files len 2 " + str(numFiles))
-                                #self.log(Level.INFO,"-----------------")
-                                
                                 
                                 if(numFiles < 21):
                                     if(numFiles > 0):
                                         #self.printRow(val1,val2,filePath['path'])
-                                        print "<tr style=\"background-color:#ADD8E6\">"
-                                        print "<td>"
+                                        print "<tr style=\"background-color:#ADD8E6\"><td>"
                                         print val1 + " - " + filePath['path']
-                                        print "<td>"
-                                        print "<td></td><td></td>"
-                                        print "<tr>"
+                                        print "</td><td></td><td></td><tr>"
                                         
                                         
                                     message2 = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "Artifact Found" ,val1,val1)
                                     IngestServices.getInstance().postMessage(message2)
                                     for file in files:
-                                        #message2 = IngestMessage.createMessage(IngestMessage.MessageType.DATA, filePath['path'], file.getParentPath(),file.getParentPath())
-                                        #IngestServices.getInstance().postMessage(message2)
                                         art = file.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_INTERESTING_FILE_HIT)
                                         att = BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_SET_NAME.getTypeID(), 
-                                        AGPIngestModuleFactory.moduleName, 'AGP - ' + val1)
+                                        AGPIngestModuleFactory.moduleName, 'AGP ' + val1)
                                         art.addAttribute(att)
                                         
                                         
@@ -354,23 +319,17 @@ class AGPIngestModule(DataSourceIngestModule):
                                             
                                         mx = str(file.getId()) + "-" + file.getName()
                                         
-                                        print "<tr>"
-                                        print "<td>"
+                                        print "<tr><td>"
                                         print self.artifact_type
-                                        print "</td>"
-                                        print "<td>"
+                                        print "</td><td>"
                                         print val1
-                                        print "</td>"
-                                        print "<td>"
+                                        print "</td><td>"
                                         print mx
-                                        print "</td>"
-                                        print "<td>"
+                                        print "</td><td>"
                                         print mx1
-                                        print "</td>"
-                                        print "<td>"
+                                        print "</td><td>"
                                         print file.getParentPath()
-                                        print "</td>"
-                                        print "</tr>"
+                                        print "</td></tr>"
                                         
                                         IngestServices.getInstance().fireModuleDataEvent(
                                         ModuleDataEvent(AGPIngestModuleFactory.moduleName, 
@@ -378,8 +337,6 @@ class AGPIngestModule(DataSourceIngestModule):
                             
                         except:
                             a = 1
-                            #message2 = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "not found" ,"not found","not found")
-                            #IngestServices.getInstance().postMessage(message2)
                 
                 except IOException as ex:
                         message2 = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "IOEXCEPTION", "IOEXCEPTION","IOEXCEPTION")
@@ -391,7 +348,7 @@ class AGPIngestModule(DataSourceIngestModule):
         skCase = Case.getCurrentCase().getSleuthkitCase();
         fileManager = Case.getCurrentCase().getServices().getFileManager()
 
-        # Create Recyclebin directory in temp directory, if it exists then continue on processing		
+        # Create Registry directory in temp directory, if it exists then continue on processing		
         Temp_Dir = Case.getCurrentCase().getTempDirectory()
         temp_dir = os.path.join(Temp_Dir, "registries")
         self.log(Level.INFO, "create Directory " + temp_dir)
@@ -416,24 +373,17 @@ class AGPIngestModule(DataSourceIngestModule):
         files = ntUserFiles + usrClassFiles  + files1 + files2 + files3 + files4 + files5 + files6 + files7 + files8
         
         numFiles = len(files)
-        #self.log(Level.INFO, "Number of  Files found ==> " + str(numFiles))
-        
-    
         if PlatformUtil.isWindowsOS():
-            self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
-            if not os.path.exists(self.path_to_Webcache_file):
+            self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
+            if not os.path.exists(self.path_to_Excel_file):
                  raise IngestModuleException("XLS Executable does not exist for Windows")
         elif PlatformUtil.getOSName() == 'Linux':
-            self.path_to_Webcache_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
-            if not os.path.exists(self.path_to_Webcache_file):
+            self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
+            if not os.path.exists(self.path_to_Excel_file):
                 raise IngestModuleException("XLS Executable does not exist for Linux")
         i = 0     
-
-     
-        #print "<br><br><br><br><h1>REGISTRY ARTIFACTS</h1><br><br><br><br>"
-        
-        mes1000 ="<div style=\"display: block;margin-left: auto;margin-right: auto;width: 40%;\"><a href=\"#dashboard\" data-transition=\"slide\" data-direction=\"reverse\"><img alt=\"\" title=\"\" src=\"https://agpnewhaven.com/static/img/agp_logo.png\"  /></a></div>"
-        print mes1000
+        Div_Image_Logo ="<div style=\"display: block;margin-left: auto;margin-right: auto;width: 40%;\"><a href=\"#dashboard\" data-transition=\"slide\" data-direction=\"reverse\"><img alt=\"\" title=\"\" src=\"https://agpnewhaven.com/static/img/agp_logo.png\"  /></a></div>"
+        print Div_Image_Logo
         print "<table>"
         print "<tr><th>Artifact Type</th><th>Key</th><th>VALUE NAME</th><th>VALUE</th></tr>"
         
@@ -444,7 +394,7 @@ class AGPIngestModule(DataSourceIngestModule):
                     i = i + 1
                     lclDbPath = os.path.join(temp_dir,  str(i) + '' + file.getName())
                     ContentUtils.writeToFile(file, File(lclDbPath))
-                    inp = FileInputStream(self.path_to_Webcache_file)
+                    inp = FileInputStream(self.path_to_Excel_file)
                     myWorkBook = HSSFWorkbook (inp)
                     sheet = myWorkBook.getSheet("Windows Registry Artifacts")
                     i1  = 1                   
@@ -636,42 +586,30 @@ class AGPIngestModule(DataSourceIngestModule):
             currentKey = currentKey.getSubkey(key) 
         return currentKey  
 
-    def printRow(self, value, value1, value2):
-        #sys.stdout = open(self.path_to_Webcache_file10,'w')  
-        print "<tr>"
-        print "<td>"
+    def printRow(self, column1, column2, column3):
+        print "<tr><td>"
         print self.artifact_type
-        print "</td>"
-        print "<td>"
-        print value
-        print "</td>"
-        print "<td>"
-        print  value1
-        print "</td>"
-        print "<td>"
-        print value2
-        print "</td>"
-        print "</tr>"
+        print "</td><td>"
+        print column1
+        print "</td><td>"
+        print column2
+        print "</td><td>"
+        print column3
+        print "</td></tr>"
         
-    def printRow2(self, value, value1, value2,value3):
-        #sys.stdout = open(self.path_to_Webcache_file10,'w')  
-        print "<tr>"
-        print "<td>"
+    def printRow2(self, column1, column2, column3,column4):
+        print "<tr><td>"
         print self.artifact_type
-        print "</td>"
-        print "<td>"
-        print value
-        print "</td>"
-        print "<td>"
-        print  value1
-        print "</td>"
-        print "<td>"
-        print value2
-        print "</td>"
-        print "<td>"
-        print value3
-        print "</td>"
-        print "</tr>"
+        print "</td><td>"
+        print column1
+        print "</td><td>"
+        print column2
+        print "</td><td>"
+        print column3
+        print "</td><td>"
+        print column4
+        print "</td></tr>"
+        
     def getRawData(self, rawData):
     
         hexArray = ""
@@ -700,30 +638,31 @@ class AGPWithUISettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.customizeComponents()
     
     def checkBoxEvent(self, event):
-        if self.Recentlyused_CB2.isSelected():
+        if self.Export_CB.isSelected():
             self.local_settings.setSetting('EXPORT', 'true')
         else:
             self.local_settings.setSetting('EXPORT', 'false')
             
-        if self.Recentlyused_CB.isSelected():
-            self.local_settings.setSetting('CSV_Flag', 'true')
+        if self.FileArtifacts_CB.isSelected():
+            self.local_settings.setSetting('FileArtifacts_Flag', 'true')
         else:
-            self.local_settings.setSetting('CSV_Flag', 'false')
+            self.local_settings.setSetting('FileArtifacts_Flag', 'false')
             
-        if self.Recentlyused_CB1.isSelected():
-            self.local_settings.setSetting('DOWNLOAD', 'true')
+        if self.RegitryArtifacts_CB.isSelected():
+            self.local_settings.setSetting('RegistryArtifacts_Flag', 'true')
         else:
-            self.local_settings.setSetting('DOWNLOAD', 'false')  
+            self.local_settings.setSetting('RegistryArtifacts_Flag', 'false')  
    
     def setLevel(self, event):
-        self.local_settings.setSetting('Level', self.Recentlyused_CB3.getText()) 
+        self.local_settings.setSetting('Level', self.Level_TF.getText()) 
 
     def initComponents(self):
         self.panel0 = JPanel()
         self.gbPanel0 = GridBagLayout() 
         self.gbcPanel0 = GridBagConstraints() 
-        self.panel0.setLayout( self.gbPanel0 ) 
-        self.Recentlyused_CB = JCheckBox( "File artifacts", actionPerformed=self.checkBoxEvent) 
+        self.panel0.setLayout( self.gbPanel0 )
+        
+        self.FileArtifacts_CB = JCheckBox( "File Artifacts", actionPerformed=self.checkBoxEvent) 
         self.gbcPanel0.gridx = 2 
         self.gbcPanel0.gridy = 5
         self.gbcPanel0.gridwidth = 1 
@@ -732,9 +671,10 @@ class AGPWithUISettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.gbcPanel0.weightx = 1 
         self.gbcPanel0.weighty = 0 
         self.gbcPanel0.anchor = GridBagConstraints.NORTH 
-        self.gbPanel0.setConstraints( self.Recentlyused_CB, self.gbcPanel0 ) 
-        self.panel0.add( self.Recentlyused_CB ) 
-        self.Recentlyused_CB1 = JCheckBox( "Registry Artifacts", actionPerformed=self.checkBoxEvent) 
+        self.gbPanel0.setConstraints( self.FileArtifacts_CB, self.gbcPanel0 ) 
+        self.panel0.add( self.FileArtifacts_CB ) 
+        
+        self.RegitryArtifacts_CB = JCheckBox( "Registry Artifacts", actionPerformed=self.checkBoxEvent) 
         self.gbcPanel0.gridx = 2 
         self.gbcPanel0.gridy = 7 
         self.gbcPanel0.gridwidth = 1 
@@ -743,11 +683,10 @@ class AGPWithUISettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.gbcPanel0.weightx = 1 
         self.gbcPanel0.weighty = 0 
         self.gbcPanel0.anchor = GridBagConstraints.NORTH 
-        self.gbPanel0.setConstraints( self.Recentlyused_CB1, self.gbcPanel0 ) 
-        self.panel0.add( self.Recentlyused_CB1 ) 
+        self.gbPanel0.setConstraints( self.RegitryArtifacts_CB, self.gbcPanel0 ) 
+        self.panel0.add( self.RegitryArtifacts_CB ) 
         
-        
-        self.Recentlyused_CB2 = JCheckBox( "Export Files", actionPerformed=self.checkBoxEvent) 
+        self.Export_CB = JCheckBox( "Export Files", actionPerformed=self.checkBoxEvent) 
         self.gbcPanel0.gridx = 2 
         self.gbcPanel0.gridy = 9 
         self.gbcPanel0.gridwidth = 1 
@@ -756,9 +695,8 @@ class AGPWithUISettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.gbcPanel0.weightx = 1 
         self.gbcPanel0.weighty = 0 
         self.gbcPanel0.anchor = GridBagConstraints.NORTH 
-        self.gbPanel0.setConstraints( self.Recentlyused_CB2, self.gbcPanel0 ) 
-        self.panel0.add( self.Recentlyused_CB2 )
-        
+        self.gbPanel0.setConstraints( self.Export_CB, self.gbcPanel0 ) 
+        self.panel0.add( self.Export_CB )
         
         self.Label_1 = JLabel("Traverse Level:")
         self.Label_1.setEnabled(True)
@@ -773,9 +711,8 @@ class AGPWithUISettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.gbPanel0.setConstraints( self.Label_1, self.gbcPanel0 ) 
         self.panel0.add( self.Label_1 ) 
         
-        
-        self.Recentlyused_CB3 = JTextField("",10,focusLost=self.setLevel) 
-        self.Recentlyused_CB3.setEnabled(True)
+        self.Level_TF = JTextField("",10,focusLost=self.setLevel) 
+        self.Level_TF.setEnabled(True)
         self.gbcPanel0.gridx = 4
         self.gbcPanel0.gridy = 11
         self.gbcPanel0.gridwidth = 1 
@@ -784,16 +721,17 @@ class AGPWithUISettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.gbcPanel0.weightx = 1 
         self.gbcPanel0.weighty = 0 
         self.gbcPanel0.anchor = GridBagConstraints.NORTH 
-        self.gbPanel0.setConstraints( self.Recentlyused_CB3, self.gbcPanel0 ) 
-        self.panel0.add( self.Recentlyused_CB3 )
+        self.gbPanel0.setConstraints( self.Level_TF, self.gbcPanel0 ) 
+        self.panel0.add( self.Level_TF )
         
         self.add(self.panel0)
 
     def customizeComponents(self):
-        self.Recentlyused_CB.setSelected(self.local_settings.getSetting('CSV_Flag') == 'true')
-        self.Recentlyused_CB1.setSelected(self.local_settings.getSetting('DOWNLOAD') == 'true')
-        self.Recentlyused_CB2.setSelected(self.local_settings.getSetting('EXPORT') == 'true')
-        self.Recentlyused_CB3.setText(self.local_settings.getSetting('Level'))
+        self.FileArtifacts_CB.setSelected(self.local_settings.getSetting('FileArtifacts_Flag') == 'true')
+        self.RegitryArtifacts_CB.setSelected(self.local_settings.getSetting('RegistryArtifacts_Flag') == 'true')
+        self.Export_CB.setSelected(self.local_settings.getSetting('EXPORT') == 'true')
+        self.Level_TF.setText(self.local_settings.getSetting('Level'))
+        self.Level_TF.setText(self.local_settings.getSetting('Level'))
     # Return the settings used
     def getSettings(self):
         return self.local_settings

@@ -63,7 +63,7 @@ from java.io import File
 from org.sleuthkit.datamodel import TskData
 
 
-class AGPIngestModuleFactory(IngestModuleFactoryAdapter):
+class ForensicAFIngestModuleFactory(IngestModuleFactoryAdapter):
 
     def __init__(self):
         self.settings = None
@@ -90,18 +90,18 @@ class AGPIngestModuleFactory(IngestModuleFactoryAdapter):
         if not isinstance(settings, GenericIngestModuleJobSettings):
             raise IllegalArgumentException("Expected settings argument to be instanceof GenericIngestModuleJobSettings")
         self.settings = settings
-        return AGPWithUISettingsPanel(self.settings)
+        return ForensicAFWithUISettingsPanel(self.settings)
 
     def isDataSourceIngestModuleFactory(self):
         return True
 
     def createDataSourceIngestModule(self, ingestOptions):
-        return AGPIngestModule(self.settings)
+        return ForensicAFIngestModule(self.settings)
 
 # Data Source-level ingest module.  One gets created per data source.
-class AGPIngestModule(DataSourceIngestModule):
+class ForensicAFIngestModule(DataSourceIngestModule):
 
-    _logger = Logger.getLogger(AGPIngestModuleFactory.moduleName)
+    _logger = Logger.getLogger(ForensicAFIngestModuleFactory.moduleName)
 
     def log(self, level, msg):
         self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
@@ -198,7 +198,7 @@ class AGPIngestModule(DataSourceIngestModule):
             if not os.path.exists(self.path_to_Excel_file):
                 raise IngestModuleException("XLS Executable does not exist for Linux")
            
-        Div_Image_Logo ="<div style=\"display: block;margin-left: auto;margin-right: auto;width: 40%;\"><a href=\"#dashboard\" data-transition=\"slide\" data-direction=\"reverse\"><img alt=\"\" title=\"\" src=\"https://agpnewhaven.com/static/img/agp_logo.png\"  /></a></div>"
+        Div_Image_Logo ="<div style=\"display: block;margin-left: auto;margin-right: auto;width: 40%;\"><a href=\"#dashboard\" data-transition=\"slide\" data-direction=\"reverse\"><img alt=\"\" title=\"\" style=\"width:342px;height:117px;\" src=\"https://agpnewhaven.com/static/img/agp_logo.png\"  /></a></div>"
         print Div_Image_Logo
         print "<table>"
         print "<tr><th>Artifact Type</th><th>Artifact name</th><th>FILE NAME</th><th>FILE PATH</th><th>Path on Disk</th></tr>"
@@ -292,7 +292,7 @@ class AGPIngestModule(DataSourceIngestModule):
                                     for file in files:
                                         art = file.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_INTERESTING_FILE_HIT)
                                         att = BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_SET_NAME.getTypeID(), 
-                                        AGPIngestModuleFactory.moduleName, 'AGP ' + val1)
+                                        ForensicAFIngestModuleFactory.moduleName, 'ForensicAF ' + val1)
                                         art.addAttribute(att)
                                         
                                         
@@ -332,7 +332,7 @@ class AGPIngestModule(DataSourceIngestModule):
                                         print "</td></tr>"
                                         
                                         IngestServices.getInstance().fireModuleDataEvent(
-                                        ModuleDataEvent(AGPIngestModuleFactory.moduleName, 
+                                        ModuleDataEvent(ForensicAFIngestModuleFactory.moduleName, 
                                         BlackboardArtifact.ARTIFACT_TYPE.TSK_INTERESTING_FILE_HIT, None))
                             
                         except:
@@ -382,7 +382,7 @@ class AGPIngestModule(DataSourceIngestModule):
             if not os.path.exists(self.path_to_Excel_file):
                 raise IngestModuleException("XLS Executable does not exist for Linux")
         i = 0     
-        Div_Image_Logo ="<div style=\"display: block;margin-left: auto;margin-right: auto;width: 40%;\"><a href=\"#dashboard\" data-transition=\"slide\" data-direction=\"reverse\"><img alt=\"\" title=\"\" src=\"https://agpnewhaven.com/static/img/agp_logo.png\"  /></a></div>"
+        Div_Image_Logo ="<div style=\"display: block;margin-left: auto;margin-right: auto;width: 20%;\"><a href=\"#dashboard\" data-transition=\"slide\" data-direction=\"reverse\"><img alt=\"\" style=\"width:342px;height:117px;\" title=\"\" src=\"https://agpnewhaven.com/static/img/agp_logo.png\"  /></a></div>"
         print Div_Image_Logo
         print "<table>"
         print "<tr><th>Artifact Type</th><th>Key</th><th>VALUE NAME</th><th>VALUE</th></tr>"
@@ -630,7 +630,7 @@ class AGPIngestModule(DataSourceIngestModule):
         return(bytes)   
         
         
-class AGPWithUISettingsPanel(IngestModuleIngestJobSettingsPanel):
+class ForensicAFWithUISettingsPanel(IngestModuleIngestJobSettingsPanel):
     
     def __init__(self, settings):
         self.local_settings = settings

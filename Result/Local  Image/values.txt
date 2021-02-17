@@ -1,0 +1,61 @@
+2 levels
+450 gb size
+2 file artifacts initially (both tests)
+6 registry artifacts initially (both tests)
+8 total artifacts (both tests)
+4501.67488898 seconds ( 1st test)
+4408.56823848 seconds ( 2nd test)
+------------------------------------
+
+3 levels
+465 gb size
+78 file artifacts found  (one tests)
+20 registry artifacts found (one tests)
+2 file artifacts not found  (one tests)
+98 total artifacts found (one tests)
+6122.08200002 second ( only 1 test)
+
+
+2 levels
+465 gb size
+73 file artifacts found  (both tests)
+20 registry artifacts found (both tests)
+7 file artifacts not found  (both tests)
+93 total artifacts found (both tests)
+4662.82500005 second ( 1st test)
+4829.71700001 second ( 2nd test)
+
+1 levels
+465 gb size
+69 file artifacts found  (both tests)
+20 registry artifacts found (both tests)
+11 File artifacts not found (both tests)
+89 total artifacts found (both tests)
+3787.3640000 seconds ( 1st test)
+3654.5214678 seconds ( 2nd test)
+
+0 levels
+465 gb size
+41 file artifacts found  (both tests)
+20 registry artifacts found (both tests)
+39 File artifacts not found (both tests)
+61 total artifacts found (both tests)
+2353.67799997 second ( 1st test)
+2306.70900011 second ( 2nd test)
+
+
+Implication: More levels (trying part of the path), you will find more artifacts. But less levels, You will get less artifacts but faster time since you are searching for less paths. 
+
+For ex. /applications/username/1/2/3 , if that is path /applications/username/1/2/3  0 levels you find nothing. But if I try 2 levels /1/2/3 without first part it finds the results.
+
+It looks like its taking double time if we traverse up to 2 levels, than zero. If there is 1500 artifacts , for 0 level traverse we are searching 1500 paths. For 2 level traverse we search anywhere between 1500 - 4500 depending on results( for ex. If a/b/c/d returns results, I dont bother searching for b/c/d or c/d).
+
+
+
+
+-------------------------------------------
+
+
+
+
+

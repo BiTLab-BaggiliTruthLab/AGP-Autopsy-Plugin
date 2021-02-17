@@ -1,0 +1,2 @@
+it took 172.69 seconds first try
+It took 180.45 seconds second try

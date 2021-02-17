@@ -1,0 +1,4 @@
+Tracy Mac 2 levels
+1461.55200005 seconds
+2 file artifact found
+0 registry artifact ( its Mac , that's why)

@@ -114,7 +114,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
     def startUp(self, context):
         self.context = context
 	
-        if self.local_settings.getSetting('FileArtifacts_Flag') == 'true':
+        if self.local_settings.getSetting('FileArtifacts_Flag') == 'true' or self.local_settings.getSetting('RegistryArtifacts_Flag') == 'true':
             if PlatformUtil.isWindowsOS():
                 self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
                 if not os.path.exists(self.path_to_Excel_file):
@@ -123,16 +123,6 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                 self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
                 if not os.path.exists(self.path_to_Excel_file):
                    raise IngestModuleException("XLS  does not exist for Linux")
-        if self.local_settings.getSetting('RegistryArtifacts_Flag') == 'true':
-            if PlatformUtil.isWindowsOS():
-                self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
-                if not os.path.exists(self.path_to_Excel_file):
-                   raise IngestModuleException("XLS  does not exist for Windows")
-            elif PlatformUtil.getOSName() == 'Linux':
-                self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
-                if not os.path.exists(self.path_to_Excel_file):
-                   raise IngestModuleException("XLS  does not exist for Linux")
-
         pass
 
 

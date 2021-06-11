@@ -211,7 +211,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                     sheet = myWorkBook.getSheet("File Artifacts")
                     indexRow  = 1
                     rowsCount = sheet.getLastRowNum()
-                    while i1 <= rowsCount:
+                    while indexRow <= rowsCount:
                         row = sheet.getRow(indexRow)
                         indexRow = indexRow + 1
                         cell = row.getCell(23)

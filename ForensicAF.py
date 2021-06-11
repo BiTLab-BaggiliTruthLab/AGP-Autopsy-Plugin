@@ -85,7 +85,6 @@ class ForensicAFIngestModuleFactory(IngestModuleFactoryAdapter):
     def hasIngestJobSettingsPanel(self):
         return True
 
-    # TODO: Update class names to ones that you create below
     def getIngestJobSettingsPanel(self, settings):
         if not isinstance(settings, GenericIngestModuleJobSettings):
             raise IllegalArgumentException("Expected settings argument to be instanceof GenericIngestModuleJobSettings")
@@ -114,7 +113,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
 
     def startUp(self, context):
         self.context = context
-
+	
         if self.local_settings.getSetting('FileArtifacts_Flag') == 'true':
             if PlatformUtil.isWindowsOS():
                 self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
@@ -147,7 +146,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
         now = datetime.now()
         dt_string = str(int(time.time()))
         self.path_to_Report_File = os.path.join(os.path.dirname(os.path.abspath(__file__)), ( "report" + dt_string + ".html"))
-        sys.stdout = open(self.path_to_Report_File,'w')
+        sys.stdout = open(self.path_to_Report_File,'w')#makes everything we print, into the html file.
         print "<html>"
         html_head = "<head><style>input { display: none; } input + label { display: inline-block } input ~ .tab { display: none } #tab1:checked ~ .tab.content1, #tab2:checked ~ .tab.content2 { display: block; } input + label {border: 1px solid #999;background: #EEE;padding: 4px 12px;border-radius: 4px 4px 0 0;position: relative;top: 1px;} input:checked + label { background: #FFF; border-bottom: 1px solid transparent;} input ~ .tab {border-top: 1px solid #999; padding: 12px;}  table {font-family: arial, sans-serif;border-collapse: collapse; width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}</style></head>"
         print html_head
@@ -161,7 +160,6 @@ class ForensicAFIngestModule(DataSourceIngestModule):
         self.artifact_type = "File"
        
         print "<div class=\"tab content2\">"
-        #print "<tr><th>Artifact Type</th><th>Artifact name</th><th>FILE NAME</th><th>FILE PATH</th></tr>"
         if self.local_settings.getSetting('FileArtifacts_Flag') == 'true':
             progressBar.progress("Processing XLS")	
             self.process_File(dataSource, progressBar)
@@ -183,6 +181,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
         return IngestModule.ProcessResult.OK                
 
     def process_File(self, dataSource, progressBar): 
+	#analyze file artificats.
         progressBar.switchToIndeterminate()
         
         skCase = Case.getCurrentCase().getSleuthkitCase()
@@ -206,22 +205,22 @@ class ForensicAFIngestModule(DataSourceIngestModule):
             if True:
                 try:
                     
-                    inp = FileInputStream(self.path_to_Excel_file)
+                    inp = FileInputStream(self.path_to_Excel_file)# read the SearchResults.xls file, all file artificats in them.
                     myWorkBook = HSSFWorkbook (inp)
                     sheet = myWorkBook.getSheet("File Artifacts")
                     indexRow  = 1
-                    rowsCount = sheet.getLastRowNum()
+                    rowsCount = sheet.getLastRowNum()#let us read row by row in the excel file.
                     while indexRow <= rowsCount:
                         row = sheet.getRow(indexRow)
                         indexRow = indexRow + 1
-                        cell = row.getCell(23)
-                        cell1 = row.getCell(0)
-                        val = cell.getStringCellValue()
+                        cell = row.getCell(23)  #read file path from the excel
+                        cell1 = row.getCell(0) # read artifact name from the excel.
+                        val = cell.getStringCellValue() #read 
                         val1 = cell1.getStringCellValue()
                         try:
                             val2 = ""
                             try:
-                                cell2 = row.getCell(22)
+                                cell2 = row.getCell(22)#read file name from the excel
                                 val2 = cell2.getStringCellValue()
                             except:
                                  self.log(Level.INFO, "Error reading file name ")
@@ -234,9 +233,9 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                                     val2 = "%"
                                     
                                 
-                                files = fileManager.findFiles(dataSource, val2,  "%" + filePath['path'])
+                                files = fileManager.findFiles(dataSource, val2,  "%" + filePath['path']) #search by name, and file path. val2 is file name.
                                 
-                                numFiles = len(files)
+                                numFiles = len(files) #if number of files is 0, let us try replacing he / with \\ OR \\ with /.
                                 try:
                                     if(numFiles == 0):
                                         astring = filePath['path'].replace("/", "\\")
@@ -244,7 +243,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                                             files = fileManager.findFiles(dataSource, val2,  "%" + astring)
                                             numFiles = len(files)
                                 except:
-                                    a100 = 0
+                                    pass
                                 
                                 try:
                                     if(numFiles == 0 and val2 !=  "" and val2 !=  "%"):
@@ -253,9 +252,9 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                                             files = fileManager.findFiles(dataSource, val2,  "%" + astring)
                                             numFiles = len(files)
                                 except:
-                                    a100 = 0                                
+                                    pass                                
                                     
-                                    
+                                #if number of files is 0, and traverse level specified..let us try by traversing level by level until we find files. and try both / or \\/
                                 try: 
                                     astring = filePath['path'].replace("/", "\\")
                                     for m in range(self.level_traverse):
@@ -265,7 +264,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                                                 files = fileManager.findFiles(dataSource, val2,  "%" + astring)
                                                 numFiles = len(files) 
                                 except:
-                                    a100 = 0
+                                    pass
                                 
                                     
                                 try: 
@@ -277,11 +276,10 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                                                 files = fileManager.findFiles(dataSource, val2,  "%" + astring)
                                                 numFiles = len(files) 
                                 except:
-                                    a100 = 0
+                                    pass
                                 
-                                if(numFiles < 21):
+                                if(numFiles < 21): #if number of files more than 21, dont display those results. display those less than 21. write them to html file. using print.
                                     if(numFiles > 0):
-                                        #self.printRow(val1,val2,filePath['path'])
                                         print "<tr style=\"background-color:#ADD8E6\"><td>"
                                         print val1 + " - " + filePath['path']
                                         print "</td><td></td><td></td><tr>"
@@ -336,13 +334,14 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                                         BlackboardArtifact.ARTIFACT_TYPE.TSK_INTERESTING_FILE_HIT, None))
                             
                         except:
-                            a = 1
+                            pass
                 
                 except IOException as ex:
                         message2 = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "IOEXCEPTION", "IOEXCEPTION","IOEXCEPTION")
                         IngestServices.getInstance().postMessage(message2)        
         print "</table>"  
     def process_Registry(self, dataSource, progressBar): 
+	# process the registry artificats now.
         progressBar.switchToIndeterminate()
         
         skCase = Case.getCurrentCase().getSleuthkitCase();
@@ -358,6 +357,9 @@ class ForensicAFIngestModule(DataSourceIngestModule):
 		    self.log(Level.INFO, "registries Directory already exists " + temp_dir)
 
 
+	# To  search  the  registry hives  I  first  needed  to  find  the  registry  hives  I  am searching  for  ie:   ntuser.dat , usrclass.dat etc. 
+	#Once  I  have  the  AbstractFile I wrote the file to the temp directory withContentUtils.writeToFile. 
+	#From there I start to search for the hive based on the key in the list of AGP registry artifacts 
 
         systemAbsFile = []
         ntUserFiles = fileManager.findFiles(dataSource, "ntuser.dat")
@@ -393,14 +395,15 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                 
                     i = i + 1
                     lclDbPath = os.path.join(temp_dir,  str(i) + '' + file.getName())
+	            #write to temp directory
                     ContentUtils.writeToFile(file, File(lclDbPath))
                     inp = FileInputStream(self.path_to_Excel_file)
                     myWorkBook = HSSFWorkbook (inp)
-                    sheet = myWorkBook.getSheet("Windows Registry Artifacts")
+                    sheet = myWorkBook.getSheet("Windows Registry Artifacts") # we read registry artifacts from excel file.
                     indexRow  = 1                   
                     rowsCount = sheet.getLastRowNum()
                   
-                    while indexRow <= rowsCount:
+                    while indexRow <= rowsCount:#loop over registry artifacts in excel file.
                         registryKeyToFind2 = ""
                         row = sheet.getRow(indexRow)
                         indexRow = indexRow + 1
@@ -413,7 +416,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                         if True:   
                             try:
                                 samRegFile = RegistryHiveFile(File(lclDbPath))
-                                currentKey = self.findRegistryKey(samRegFile, val)
+                                currentKey = self.findRegistryKey(samRegFile, val)  #start to search for the hive based on the key in the list of AGP registry artifacts 
                                 self.printRow(val, "","")
                                
                                 for value in currentKey.getValueList():
@@ -424,7 +427,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                                         mn = str(value.getValue().getAsNumber())
                                         self.printRow(val, value.getName(),mn)
                                     except:
-                                        a101 = 1                                     
+                                        pass                                     
        
                               
                                 
@@ -489,7 +492,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                                     registryKeyToFind2 = os.path.join(*(regKeyList1[1:]))
                                     
                                     samRegFile = RegistryHiveFile(File(lclDbPath))
-                                    currentKey = self.findRegistryKey(samRegFile, registryKeyToFind2)
+                                    currentKey = self.findRegistryKey(samRegFile, registryKeyToFind2)#Start to search for the hive based on the key in the list of AGP registry artifacts 
 
                                     
                                     
@@ -498,14 +501,12 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                                         pd = ""
                                         for st1 in value.getValue().getAsStringList():
                                             self.printRow(registryKeyToFind2, value.getName(),st1)
-                                        
-                                        #pd = value.getValue().getAsRawData().toString() 
-                                        #self.log(Level.INFO, "mess1  " + value.getAsString())
+  
                                         try:
                                             mn = str(value.getValue().getAsNumber())
                                             self.printRow(val, value.getName(),mn)
                                         except:
-                                            a102 = 1
+                                            pass
                                         
                                     try:
                                         bamKey = currentKey.getSubkeyList()
@@ -563,14 +564,14 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                                     except:   
                                         self.log(Level.INFO, "no sam key")
                                 except:
-                                    a = 1
+                                    pass
                 
                 
                 except IOException as ex:
                         message2 = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "IOEXCEPTION", "IOEXCEPTION","IOEXCEPTION")
                         IngestServices.getInstance().postMessage(message2)
         try:
-            shutil.rmtree(temp_dir)		
+            shutil.rmtree(temp_dir)	#remove all files from temp directory.	
         except:
 		    self.log(Level.INFO, "removal of directory tree failed " + temp_dir)
         print "</table>"      

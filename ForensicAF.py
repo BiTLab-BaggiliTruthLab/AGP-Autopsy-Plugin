@@ -596,20 +596,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
         print "</td><td>"
         print column3
         print "</td></tr>"
-        
-    def printRow2(self, column1, column2, column3,column4):
-        print "<tr><td>"
-        print self.artifact_type
-        print "</td><td>"
-        print column1
-        print "</td><td>"
-        print column2
-        print "</td><td>"
-        print column3
-        print "</td><td>"
-        print column4
-        print "</td></tr>"
-        
+       
     def getRawData(self, rawData):
     
         hexArray = ""

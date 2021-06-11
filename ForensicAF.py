@@ -407,8 +407,8 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                         registryKeyToFind2 = ""
                         row = sheet.getRow(indexRow)
                         indexRow = indexRow + 1
-                        cell = row.getCell(17)
-                        cell1 = row.getCell(0)
+                        cell = row.getCell(17) #this is the key , in windows registry artifacts SearchResults.xls
+                        cell1 = row.getCell(0) #this is artifact name
                         val = cell.getStringCellValue()
                         val1 = cell1.getStringCellValue()
                         if self.context.isJobCancelled():

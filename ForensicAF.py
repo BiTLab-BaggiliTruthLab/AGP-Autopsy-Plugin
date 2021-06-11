@@ -113,7 +113,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
 
     def startUp(self, context):
         self.context = context
-	
+	 #in case file artificats or registry artifacts analysis selected, read SearchResults.xls for the relevant artifacts downloaded from artifact genome project
         if self.local_settings.getSetting('FileArtifacts_Flag') == 'true' or self.local_settings.getSetting('RegistryArtifacts_Flag') == 'true':
             if PlatformUtil.isWindowsOS():
                 self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")#test.csv
@@ -127,7 +127,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
 
 
     def process(self, dataSource, progressBar):
-
+	#process called, in case file artifact selected it will call process_file and in case registry artifact selected it will call process_Registry
         self.log(Level.INFO, "Starting to process")
         progressBar.switchToIndeterminate()
      
@@ -145,14 +145,14 @@ class ForensicAFIngestModule(DataSourceIngestModule):
         print "<input type=\"radio\" name=\"tabs\" id=\"tab1\" checked /><label for=\"tab1\">Registry</label><input type=\"radio\" name=\"tabs\" id=\"tab2\" /><label for=\"tab2\">File</label>"
         print "<div class=\"tab content1\">"
         if self.local_settings.getSetting('RegistryArtifacts_Flag') == 'true':
-                self.process_Registry(dataSource, progressBar)
+                self.process_Registry(dataSource, progressBar)#analyze registry artifacts.
         print "</div>"
         self.artifact_type = "File"
        
         print "<div class=\"tab content2\">"
         if self.local_settings.getSetting('FileArtifacts_Flag') == 'true':
             progressBar.progress("Processing XLS")	
-            self.process_File(dataSource, progressBar)
+            self.process_File(dataSource, progressBar)#analyze file artifacts
             message = IngestMessage.createMessage(IngestMessage.MessageType.DATA,
                 "ForensicAF", " ForensicAF File artifacts Has Been Analyzed " )
             IngestServices.getInstance().postMessage(message)
@@ -177,7 +177,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
         skCase = Case.getCurrentCase().getSleuthkitCase()
         blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
-        files = fileManager.findFiles(dataSource, "%", "/")
+        files = fileManager.findFiles(dataSource, "%", "/") # finds all files.
         if PlatformUtil.isWindowsOS():
             self.path_to_Excel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SearchResults.xls")
             if not os.path.exists(self.path_to_Excel_file):

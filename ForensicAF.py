@@ -171,7 +171,7 @@ class ForensicAFIngestModule(DataSourceIngestModule):
         print "</div>"
         
   
-        # After all databases, post a message to the ingest messages in box.
+        # After all , post a message to the ingest messages in box.
         message = IngestMessage.createMessage(IngestMessage.MessageType.DATA,
             "ForensicAF", " ForensicAF artifacts Has Been Analyzed " )
         IngestServices.getInstance().postMessage(message)
@@ -209,11 +209,11 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                     inp = FileInputStream(self.path_to_Excel_file)
                     myWorkBook = HSSFWorkbook (inp)
                     sheet = myWorkBook.getSheet("File Artifacts")
-                    i1  = 1
+                    indexRow  = 1
                     rowsCount = sheet.getLastRowNum()
                     while i1 <= rowsCount:
-                        row = sheet.getRow(i1)
-                        i1 = i1 + 1
+                        row = sheet.getRow(indexRow)
+                        indexRow = indexRow + 1
                         cell = row.getCell(23)
                         cell1 = row.getCell(0)
                         val = cell.getStringCellValue()
@@ -397,13 +397,13 @@ class ForensicAFIngestModule(DataSourceIngestModule):
                     inp = FileInputStream(self.path_to_Excel_file)
                     myWorkBook = HSSFWorkbook (inp)
                     sheet = myWorkBook.getSheet("Windows Registry Artifacts")
-                    i1  = 1                   
+                    indexRow  = 1                   
                     rowsCount = sheet.getLastRowNum()
                   
-                    while i1 <= rowsCount:
+                    while indexRow <= rowsCount:
                         registryKeyToFind2 = ""
-                        row = sheet.getRow(i1)
-                        i1 = i1 + 1
+                        row = sheet.getRow(indexRow)
+                        indexRow = indexRow + 1
                         cell = row.getCell(17)
                         cell1 = row.getCell(0)
                         val = cell.getStringCellValue()

@@ -1,8 +1,12 @@
 # AGP-Autopsy-Plugin
 
+**Dataset** 
+
+It is inside results folder.
+
 **Installing** 
 
-Open the Python module library folder using "Tools", "Python Plugins". Copy the module folder into there and Autopsy should identify and use it next time it loads modules.
+Open the Python module library folder using "Tools", "Python Plugins". Copy the module folder into there(which contains ForensicAF.py and SearchResults.xls) and Autopsy should identify and use it next time it loads modules.
 
 **Running the Module** 
 

@@ -23,3 +23,4 @@ Step 4: After running, results should be available in html format
 <img width="1661" alt="results html 2" src="https://user-images.githubusercontent.com/54822246/132609536-8da00941-6726-4603-97ca-84ceb8562b6f.png">
 
 
+Step 5: Check inside the module folder in python plugins, for the report and results.
